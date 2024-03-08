@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Events\DuplicateFundWarning;
 use App\Repository\FundRepository;
 use Illuminate\Support\Collection;
 
@@ -33,6 +34,8 @@ class FundService
 
     public function create($data): array
     {
+        $this->handleDuplicatedFund($data);
+
         return $this->fundRepository->create($data);
     }
 
@@ -49,6 +52,11 @@ class FundService
         }
 
         return $this->fundRepository->update($id, $data);
+    }
+
+    public function getPossibleDuplicatedFunds(): array
+    {
+        return $this->fundRepository->getPossibleDuplicatedFunds();
     }
 
     private function handleCompaniesUpdate($companies, $fundId): void
@@ -75,5 +83,12 @@ class FundService
 
         $this->fundAliasService->deleteByFundId($fundId);
         $this->fundAliasService->create($aliases);
+    }
+
+    private function handleDuplicatedFund($data): void
+    {
+        if (true === $this->fundRepository->isFundDuplicated($data)) {
+            event(new DuplicateFundWarning("The fund with the name {$data['name']} is duplicated"));
+        }
     }
 }

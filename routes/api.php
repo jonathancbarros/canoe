@@ -20,3 +20,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::resource('funds', FundController::class);
+Route::get('/possible-duplicated-funds', [FundController::class, 'getPossibleDuplicatedFunds']);

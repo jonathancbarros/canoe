@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Models\Fund;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class FundRepository
 {
@@ -53,8 +54,8 @@ class FundRepository
             $funds->where('fund_manager_id', '=', $filter['fundManagerFilter']);
         }
 
-        if ($filter['fundYearFilter']) {
-            $funds->where('start_year', '=', $filter['fundYearFilter']);
+        if ($filter['fundStartYearFilter']) {
+            $funds->where('start_year', '=', $filter['fundStartYearFilter']);
         }
 
         return $this->formatResult($funds->get());
@@ -66,6 +67,31 @@ class FundRepository
             ->newQuery()
             ->where('id', '=', $id)
             ->delete();
+    }
+
+    public function isFundDuplicated($data): bool
+    {
+        return $this->fund
+            ->newQuery()
+            ->join('fund_aliases', 'funds.id', '=', 'fund_aliases.fund_id')
+            ->where('fund_manager_id', '=', $data['fund_manager_id'])
+            ->where(function ($query) use ($data) {
+                $query
+                    ->where('fund_aliases.name', '=', $data['name'])
+                    ->orWhere('funds.name', '=', $data['name']);
+            })
+            ->exists();
+    }
+
+    public function getPossibleDuplicatedFunds(): array
+    {
+        return DB::select('
+            SELECT f.name
+            FROM funds f
+            LEFT JOIN fund_aliases fa ON f.name = fa.name AND f.id != fa.fund_id
+            GROUP BY f.name
+            HAVING COUNT(f.name) > 1 OR COUNT(fa.name) >= 1;
+        ');
     }
 
     private function formatResult(Collection $funds): Collection
