@@ -37,4 +37,5 @@ https://documenter.getpostman.com/view/464920/2sA2xh2CSz#3684c6b6-7af9-40be-947e
 
 ### Entity Relationship Diagram:
 
-![er-diagram.png](..%2F..%2F..%2FDesktop%2Fer-diagram.png)
+![er-diagram](https://github.com/jonathancbarros/canoe/assets/15067898/66933a35-6442-4d87-a62f-cbcef85ce374)
+
